@@ -557,7 +557,7 @@ class Tvdb:
         
         return str(resp)
 
-    def _getzipfile(self, url_zip, sid, language):
+    def _getzipfile(self, url_zip, sid, language, recache=False):
 
         if self.config['cache_enabled'] and self.config['cache_location']:
 
@@ -565,7 +565,7 @@ class Tvdb:
             language_xml = os.path.join(self.config['cache_location'],u'unzip-'+str(sid)+'-'+language+'.xml')
             
             if os.path.isfile(language_xml):
-                if str(self.config['cache_enabled']).lower() == 'recache':
+                if str(self.config['cache_enabled']).lower() == 'recache' or recache:
                     # When forced recache. Don't download and unzip again if file was extracted < 10 minutes ago
                     now = time.time()
                     last_time_unzipped = 600
@@ -573,13 +573,15 @@ class Tvdb:
                         # xml already extracted and recache to soon
                         log().debug("Extracted < 10 minutes ago, not recaching")
                         return True
+                    else:
+                        recache = True
                 else:
                     # xml already extracted
                     return True
                 
             # file doesn't exist or recache
             log().debug("Retrieving URL %s" % url_zip)
-            src_zip = self._loadUrl(url_zip, recache = True)
+            src_zip = self._loadUrl(url_zip, recache)
             
             # extract all files
             try:
@@ -841,9 +843,13 @@ class Tvdb:
             getShowInLanguage = self.config['language']
 
 
-        # Get series zipfile and extract to cache
+        # Get series zipfile and unzip to cache
         if self.config['use_zip']:
-            is_unzipped = self._getzipfile(self.config['url_seriesZip'] % (sid, language), sid, language)
+            if self._getzipfile(self.config['url_seriesZip'] % (sid, language), sid, language):
+                is_unzipped = True
+            else:
+                #Unzip failed. Get series zipfile with recache and unzip to cache
+                is_unzipped = self._getzipfile(self.config['url_seriesZip'] % (sid, language), sid, language, recache=True)
         else:
             is_unzipped = False
 
