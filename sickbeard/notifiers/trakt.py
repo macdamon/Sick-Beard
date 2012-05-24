@@ -52,15 +52,20 @@ class TraktNotifier:
             method = "show/episode/library/"
             method += "%API%"
             
+            # For multi-episode S01E01E02 create episodes: {'season':1,'episode':1},{'season':1,'episode':2}
+            episodes = {}
+            for curEp in [ep_obj] + ep_obj.relatedEps:
+                if episodes == {}:
+			        episodes = {'season': curEp.season,'episode': curEp.episode}
+                else:
+			        episodes = episodes,{'season': curEp.season,'episode': curEp.episode}
+
             # URL parameters
             data = {
                 'tvdb_id': ep_obj.show.tvdbid,
                 'title': ep_obj.show.name,
                 'year': ep_obj.show.startyear,
-                'episodes': [ {
-                    'season': ep_obj.season,
-                    'episode': ep_obj.episode
-                    } ]
+                'episodes': [episodes]
                 }
             
             if data is not None:
