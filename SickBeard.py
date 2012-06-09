@@ -175,11 +175,11 @@ def main():
 
         # config file
         if o in ('--config',):
-            sickbeard.CONFIG_FILE = os.path.abspath(a)
+            sickbeard.CONFIG_FILE = os.path.abspath(os.path.expanduser(os.path.expandvars(a)))
 
         # datadir
         if o in ('--datadir',):
-            sickbeard.DATA_DIR = os.path.abspath(a)
+            sickbeard.DATA_DIR = os.path.abspath(os.path.expanduser(os.path.expandvars(a)))
 
         # write a pidfile if requested
         if o in ('--pidfile',):
