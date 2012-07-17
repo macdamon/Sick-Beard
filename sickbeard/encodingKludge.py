@@ -51,8 +51,8 @@ def ek(func, *args):
 
     def changeByteStringToUnicode(obj):
         if type(obj) == str:
-            logger.log(u"A bytestring was used as an argument for function "+func.__name__+": "+repr(obj), logger.WARNING)
-            logger.log(''.join(traceback.format_stack()), logger.DEBUG)
+            # logger.log(u"A bytestring was used as an argument for function "+func.__name__+": "+repr(obj), logger.WARNING)
+            # logger.log(''.join(traceback.format_stack()), logger.DEBUG)
             return obj.decode(sickbeard.SYS_ENCODING)
         else:
             return obj
