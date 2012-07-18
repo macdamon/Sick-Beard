@@ -993,7 +993,7 @@ class CMD_Exceptions(ApiCall):
 
     def run(self):
         """ display scene exceptions for all or a given show """
-        myDB = db.DBConnection("cache.db", row_type="dict")
+        myDB = db.DBConnection(u'cache.db', row_type="dict")
 
         if self.tvdbid == None:
             sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions")

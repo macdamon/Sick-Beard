@@ -36,8 +36,8 @@ from sickbeard.databases import cache_db
 # test globals
 #=================
 TESTDIR = os.path.abspath('.')
-TESTDBNAME = "sickbeard.db"
-TESTCACHEDBNAME = "cache.db"
+TESTDBNAME = u'sickbeard.db'
+TESTCACHEDBNAME = u'cache.db'
 
 
 SHOWNAME = u"show name"
@@ -169,7 +169,7 @@ def setUp_test_db():
     db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
     
     #and for cache.b too
-    db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+    db.upgradeDatabase(db.DBConnection(u'cache.db'), cache_db.InitialSchema)
 
 
 def tearDown_test_db():

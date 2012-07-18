@@ -32,7 +32,7 @@ from sickbeard.exceptions import ex
 
 db_lock = threading.Lock()
 
-def dbFilename(filename="sickbeard.db", suffix=None):
+def dbFilename(filename=u'sickbeard.db', suffix=None):
     """
     @param filename: The sqlite database filename to use. If not specified,
                      will be made to be sickbeard.db
@@ -41,11 +41,11 @@ def dbFilename(filename="sickbeard.db", suffix=None):
     @return: the correct location of the database file.
     """
     if suffix:
-        filename = "%s.%s" % (filename, suffix)
+        filename = u'%s.%s' % (filename, suffix)
     return ek.ek(os.path.join, sickbeard.DATA_DIR, filename)
 
 class DBConnection:
-    def __init__(self, filename="sickbeard.db", suffix=None, row_type=None):
+    def __init__(self, filename=u'sickbeard.db', suffix=None, row_type=None):
 
         self.filename = filename
         self.connection = sqlite3.connect(dbFilename(filename), 20)

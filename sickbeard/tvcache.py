@@ -41,7 +41,7 @@ from name_parser.parser import NameParser, InvalidNameException
 class CacheDBConnection(db.DBConnection):
 
     def __init__(self, providerName):
-        db.DBConnection.__init__(self, "cache.db")
+        db.DBConnection.__init__(self, u'cache.db')
 
         # Create the table if it's not already there
         try:

@@ -664,7 +664,7 @@ def initialize(consoleLogging=True):
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
         
         # initialize the cache database
-        db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+        db.upgradeDatabase(db.DBConnection(u'cache.db'), cache_db.InitialSchema)
         
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)

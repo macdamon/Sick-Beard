@@ -33,7 +33,7 @@ def addNameToCache(name, tvdb_id):
     if not tvdb_id:
         tvdb_id = 0
     
-    cacheDB = db.DBConnection('cache.db')
+    cacheDB = db.DBConnection(u'cache.db')
     cacheDB.action("INSERT INTO scene_names (tvdb_id, name) VALUES (?, ?)", [tvdb_id, name])
 
 def retrieveNameFromCache(name):
@@ -48,7 +48,7 @@ def retrieveNameFromCache(name):
     # standardize the name we're using to account for small differences in providers (aka NZBMatrix sucks)
     name = sanitizeSceneName(name)
     
-    cacheDB = db.DBConnection('cache.db')
+    cacheDB = db.DBConnection(u'cache.db')
     cache_results = cacheDB.select("SELECT * FROM scene_names WHERE name = ?", [name])
 
     if not cache_results:
@@ -60,6 +60,6 @@ def clearCache():
     """
     Deletes all "unknown" entries from the cache (names with tvdb_id of 0).
     """
-    cacheDB = db.DBConnection('cache.db')
+    cacheDB = db.DBConnection(u'cache.db')
     cacheDB.action("DELETE FROM scene_names WHERE tvdb_id = ?", [0])
 

@@ -29,7 +29,7 @@ def get_scene_exceptions(tvdb_id):
     Given a tvdb_id, return a list of all the scene exceptions.
     """
 
-    myDB = db.DBConnection("cache.db")
+    myDB = db.DBConnection(u'cache.db')
     exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
     return [cur_exception["show_name"] for cur_exception in exceptions]
 
@@ -39,7 +39,7 @@ def get_scene_exception_by_name(show_name):
     is present.
     """
 
-    myDB = db.DBConnection("cache.db")
+    myDB = db.DBConnection(u'cache.db')
     
     # try the obvious case first
     exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
@@ -85,7 +85,7 @@ def retrieve_exceptions():
         
         exception_dict[tvdb_id] = alias_list
 
-    myDB = db.DBConnection("cache.db")
+    myDB = db.DBConnection(u'cache.db')
 
     changed_exceptions = False
 
