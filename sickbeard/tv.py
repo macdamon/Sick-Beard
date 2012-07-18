@@ -51,7 +51,7 @@ class TVShow(object):
 
         self.tvdbid = tvdbid
 
-        self._location = ""
+        self._location = u''
         self.name = ""
         self.tvrid = 0
         self.tvrname = ""
@@ -912,7 +912,7 @@ def dirty_setter(attr_name):
 
 class TVEpisode(object):
 
-    def __init__(self, show, season, episode, file=""):
+    def __init__(self, show, season, episode, file=None):
 
         self._name = ""
         self._season = season
@@ -930,7 +930,11 @@ class TVEpisode(object):
         self.dirty = True
 
         self.show = show
-        self._location = file
+
+        if file:
+            self._location = file
+        else:
+            self._location = u''
 
         self.lock = threading.Lock()
 
