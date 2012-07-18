@@ -42,6 +42,7 @@ from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
 
 from sickbeard.webserveInit import initWebServer
+from sickbeard import encodingKludge as ek
 
 from lib.configobj import ConfigObj
 
@@ -111,15 +112,7 @@ def main():
     TV for me
     """
 
-    # do some preliminary stuff
-    sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
-    sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
-    sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
-    sickbeard.DATA_DIR = sickbeard.PROG_DIR
-    sickbeard.MY_ARGS = sys.argv[1:]
-    sickbeard.CREATEPID = False
-    sickbeard.DAEMON = False
-
+    #See if we can encode properly, otherwise exit
     sickbeard.SYS_ENCODING = None
 
     try:
@@ -142,6 +135,16 @@ def main():
         print 'or find another way to force Python to use '+sickbeard.SYS_ENCODING+' for string encoding.'
         sys.exit(1)
  
+
+    # do some preliminary stuff
+    sickbeard.MY_ARGS = sys.argv[1:]
+    sickbeard.CREATEPID = False
+    sickbeard.DAEMON = False
+    sickbeard.MY_FULLNAME = os.path.normpath(ek.ek(os.path.abspath, __file__))
+    sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
+    sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
+    sickbeard.DATA_DIR = sickbeard.PROG_DIR
+
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
@@ -185,15 +188,15 @@ def main():
 
         # config file
         if o in ('--config',):
-            sickbeard.CONFIG_FILE = os.path.abspath(a)
+            sickbeard.CONFIG_FILE = ek.ek(os.path.abspath, a)
 
         # datadir
         if o in ('--datadir',):
-            sickbeard.DATA_DIR = os.path.abspath(a)
+            sickbeard.DATA_DIR = ek.ek(os.path.abspath, a)
 
         # write a pidfile if requested
         if o in ('--pidfile',):
-            sickbeard.PIDFILE = str(a)
+            sickbeard.PIDFILE = ek.ek(os.path.abspath, a)
 
             # if the pidfile already exists, sickbeard may still be running, so exit
             if os.path.exists(sickbeard.PIDFILE):
