@@ -85,6 +85,7 @@ def daemonize():
     os.setsid() #@UndefinedVariable - only available in UNIX
 
     # Make sure I can read my own files and shut out others
+    os.chdir(sickbeard.PROG_DIR)
     prev = os.umask(0)
     os.umask(prev and int('077', 8))
 
@@ -97,8 +98,22 @@ def daemonize():
         raise RuntimeError("2nd fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
-    dev_null = file('/dev/null', 'r')
-    os.dup2(dev_null.fileno(), sys.stdin.fileno())
+    # redirect standaard file descriptors
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    if (hasattr(os, 'devnull')):
+        dev_null = os.devnull
+    else:
+        dev_null = '/dev/null'
+
+    std_in = file(dev_null, 'r')
+    std_out = file(dev_null, 'a+')
+    std_err = file(dev_null, 'a+', 0)
+
+    os.dup2(std_in.fileno(), sys.stdin.fileno())
+    os.dup2(std_out.fileno(), sys.stdout.fileno())
+    os.dup2(std_err.fileno(), sys.stderr.fileno())
 
     if sickbeard.CREATEPID:
         pid = str(os.getpid())
