@@ -203,18 +203,19 @@ class NewznabProvider(generic.NZBProvider):
 
 		try:
 			parsedXML = parseString(data)
-			items = parsedXML.getElementsByTagName('item')
+			if parsedXML.documentElement.tagName != 'rss':
+				logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
+				items = None
+			else:
+				items = parsedXML.getElementsByTagName('item')
+
 		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
-			logger.log(u"RSS data: "+data, logger.DEBUG)
-			return []
+			logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
+			logger.log(u"RSS data: " + data, logger.DEBUG)
+			items = None
 
 		if not self._checkAuthFromData(data):
-			return []
-
-		if parsedXML.documentElement.tagName != 'rss':
-			logger.log(u"Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
-			return []
+			items = None
 
 		results = []
 
@@ -222,10 +223,16 @@ class NewznabProvider(generic.NZBProvider):
 			(title, url) = self._get_title_and_url(curItem)
 
 			if not title or not url:
-				logger.log(u"The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+				logger.log(u"The XML returned from the " + self.name + u" RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
 				continue
 
 			results.append(curItem)
+
+		# Make sure the minidom doesn't cause memory leak
+		try:
+			parsedXML.unlink()
+		except:
+			parsedXML = None
 
 		return results
 

@@ -102,30 +102,38 @@ class TVCache():
         if data:
             self.setLastUpdate()
         else:
-            return []
+            return
 
         # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
         if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+            raise exceptions.AuthException(u"Your authentication info for " + self.provider.name + " is incorrect, check your config")
 
         try:
             parsedXML = xml.dom.minidom.parseString(data)
-            items = parsedXML.getElementsByTagName('item')
-        except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
-            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
-            return []
+            if parsedXML.documentElement.tagName != 'rss':
+                logger.log(u"Resulting XML from " + self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+                items = None
+            else:
+                items = parsedXML.getElementsByTagName('item')
 
-        if parsedXML.documentElement.tagName != 'rss':
-            logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
-            return []
+        except Exception, e:
+            logger.log(u"Error trying to load " + self.provider.name + " RSS feed: " + ex(e), logger.ERROR)
+            logger.log(u"Feed contents: " + repr(data), logger.DEBUG)
+            items = None
 
         for item in items:
-
             self._parseItem(item)
+
+        # Make sure the minidom doesn't cause memory leak
+        try:
+            parsedXML.unlink()
+        except Exception:
+            parsedXML = None
+
+        return
 
     def _translateLinkURL(self, url):
         return url.replace('&amp;','&')
