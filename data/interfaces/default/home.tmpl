@@ -14,8 +14,12 @@
 
 #set $myDB = $db.DBConnection()
 #set $today = str($datetime.date.today().toordinal())
-#set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
+
+#set $show_snatched_eps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 AND episode != 0 AND airdate != 1 AND airdate <= " + $today + " AND (status IN (" + ",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER]) + ")) GROUP BY showid;")
+
+#set $show_download_eps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 AND episode != 0 AND airdate != 1 AND airdate <= " + $today + " AND (status IN (" + ",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]]) + ")) GROUP BY showid;")
+
+#set $show_all_eps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 AND episode != 0 AND airdate != 1 AND airdate <= " + $today + " AND (status != " + str($IGNORED) + ") GROUP BY showid;")
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -127,24 +131,26 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
 #set $curEp = $curShow.nextEpisode()
 
-#set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
-#set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
+#set $curShowSnatched = [x[1] for x in $show_snatched_eps if int(x[0]) == $curShow.tvdbid]
+#if len($curShowSnatched) == 0:
+    #set $curShowSnatched = [0]
+#end if
+
+#set $curShowDownloads = [x[1] for x in $show_download_eps if int(x[0]) == $curShow.tvdbid]
+#if len($curShowDownloads) == 0:
+    #set $curShowDownloads = [0]
+#end if
+
+#set $curShowAll = [x[1] for x in $show_all_eps if int(x[0]) == $curShow.tvdbid]
 #if len($curShowAll) != 0:
-  #if len($curShowDownloads) != 0:
-    #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
-    #set $nom = $curShowDownloads[0]
-    #set $den = $curShowAll[0]
-  #else
-    #set $dlStat = "0 / "+str($curShowAll[0])
-    #set $nom = 0
-    #set $den = $curShowAll[0]
-  #end if
+  #set $dlStat = str($curShowDownloads[0] + $curShowSnatched[0]) + " / " + str($curShowAll[0])
+  #set $nom = $curShowDownloads[0]
+  #set $den = $curShowAll[0]
 #else
   #set $dlStat = "?"
   #set $nom = 0
   #set $den = 1
 #end if
-
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
