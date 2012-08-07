@@ -61,7 +61,7 @@ from sickbeard import browser
 
 class PageTemplate (Template):
     def __init__(self, *args, **KWs):
-        KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
+        KWs['file'] = os.path.join(sickbeard.PROG_DIR, u"data/interfaces/default/", KWs['file'])
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.sbHttpPort = sickbeard.WEB_PORT
@@ -120,7 +120,7 @@ def _munge(string):
     return unicode(string).encode('utf-8', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
-    t = PageTemplate(file="genericMessage.tmpl")
+    t = PageTemplate(file=u"genericMessage.tmpl")
     t.submenu = HomeMenu()
     t.subject = subject
     t.message = message
@@ -153,7 +153,7 @@ class ManageSearches:
 
     @cherrypy.expose
     def index(self):
-        t = PageTemplate(file="manage_manageSearches.tmpl")
+        t = PageTemplate(file=u"manage_manageSearches.tmpl")
         #t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
         t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
         t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
@@ -201,7 +201,7 @@ class Manage:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="manage.tmpl")
+        t = PageTemplate(file=u"manage.tmpl")
         t.submenu = ManageMenu
         return _munge(t)
 
@@ -238,7 +238,7 @@ class Manage:
         else:
             status_list = []
         
-        t = PageTemplate(file="manage_episodeStatuses.tmpl")
+        t = PageTemplate(file=u"manage_episodeStatuses.tmpl")
         t.submenu = ManageMenu
         t.whichStatus = whichStatus
 
@@ -317,7 +317,7 @@ class Manage:
     @cherrypy.expose
     def backlogOverview(self):
 
-        t = PageTemplate(file="manage_backlogOverview.tmpl")
+        t = PageTemplate(file=u"manage_backlogOverview.tmpl")
         t.submenu = ManageMenu
 
         myDB = db.DBConnection()
@@ -357,7 +357,7 @@ class Manage:
     @cherrypy.expose
     def massEdit(self, toEdit=None):
 
-        t = PageTemplate(file="manage_massEdit.tmpl")
+        t = PageTemplate(file=u"manage_massEdit.tmpl")
         t.submenu = ManageMenu
 
         if not toEdit:
@@ -579,7 +579,7 @@ class History:
         else:
             sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?", [limit])
 
-        t = PageTemplate(file="history.tmpl")
+        t = PageTemplate(file=u"history.tmpl")
         t.historyResults = sqlResults
         t.limit = limit
         t.submenu = [
@@ -621,7 +621,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="config_general.tmpl")
+        t = PageTemplate(file=u"config_general.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -757,7 +757,7 @@ class ConfigSearch:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="config_search.tmpl")
+        t = PageTemplate(file=u"config_search.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -837,7 +837,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="config_postProcessing.tmpl")
+        t = PageTemplate(file=u"config_postProcessing.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -962,7 +962,7 @@ class ConfigProviders:
 
     @cherrypy.expose
     def index(self):
-        t = PageTemplate(file="config_providers.tmpl")
+        t = PageTemplate(file=u"config_providers.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -1131,7 +1131,7 @@ class ConfigNotifications:
 
     @cherrypy.expose
     def index(self):
-        t = PageTemplate(file="config_notifications.tmpl")
+        t = PageTemplate(file=u"config_notifications.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -1433,7 +1433,7 @@ class Config:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="config.tmpl")
+        t = PageTemplate(file=u"config.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
 
@@ -1468,7 +1468,7 @@ class HomePostProcess:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="home_postprocess.tmpl")
+        t = PageTemplate(file=u"home_postprocess.tmpl")
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -1491,7 +1491,7 @@ class NewHomeAddShows:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="home_addShows.tmpl")
+        t = PageTemplate(file=u"home_addShows.tmpl")
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -1571,7 +1571,7 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def massAddTable(self, rootDir=None):
-        t = PageTemplate(file="home_massAddTable.tmpl")
+        t = PageTemplate(file=u"home_massAddTable.tmpl")
         t.submenu = HomeMenu()
         
         myDB = db.DBConnection()
@@ -1643,7 +1643,7 @@ class NewHomeAddShows:
         Display the new show page which collects a tvdb id, folder, and extra options and
         posts them to addNewShow
         """
-        t = PageTemplate(file="home_newShow.tmpl")
+        t = PageTemplate(file=u"home_newShow.tmpl")
         t.submenu = HomeMenu()
         
         show_dir, tvdb_id, show_name = self.split_extra_show(show_to_add)
@@ -1773,7 +1773,7 @@ class NewHomeAddShows:
         """
         Prints out the page to add existing shows from a root dir 
         """
-        t = PageTemplate(file="home_addExistingShow.tmpl")
+        t = PageTemplate(file=u"home_addExistingShow.tmpl")
         t.submenu = HomeMenu()
         
         return _munge(t)
@@ -1860,7 +1860,7 @@ class ErrorLogs:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="errorlogs.tmpl")
+        t = PageTemplate(file=u"errorlogs.tmpl")
         t.submenu = ErrorLogsMenu
 
         return _munge(t)
@@ -1874,7 +1874,7 @@ class ErrorLogs:
     @cherrypy.expose
     def viewlog(self, minLevel=logger.MESSAGE, maxLines=500):
 
-        t = PageTemplate(file="viewlogs.tmpl")
+        t = PageTemplate(file=u"viewlogs.tmpl")
         t.submenu = ErrorLogsMenu
 
         minLevel = int(minLevel)
@@ -1948,7 +1948,7 @@ class Home:
     @cherrypy.expose
     def index(self):
 
-        t = PageTemplate(file="home.tmpl")
+        t = PageTemplate(file=u"home.tmpl")
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -2137,7 +2137,7 @@ class Home:
         if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
-        t = PageTemplate(file="restart.tmpl")
+        t = PageTemplate(file=u"restart.tmpl")
         t.submenu = HomeMenu()
 
         # do a soft restart
@@ -2156,7 +2156,7 @@ class Home:
         if updated:
             # do a hard restart
             threading.Timer(2, sickbeard.invoke_restart, [False]).start()
-            t = PageTemplate(file="restart_bare.tmpl")
+            t = PageTemplate(file=u"restart_bare.tmpl")
             return _munge(t)
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
@@ -2185,7 +2185,7 @@ class Home:
             [showObj.tvdbid]
         )
 
-        t = PageTemplate(file="displayShow.tmpl")
+        t = PageTemplate(file=u"displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
         try:
@@ -2278,7 +2278,7 @@ class Home:
 
         if not location and not anyQualities and not bestQualities and not flatten_folders:
 
-            t = PageTemplate(file="editShow.tmpl")
+            t = PageTemplate(file=u"editShow.tmpl")
             t.submenu = HomeMenu()
             with showObj.lock:
                 t.show = showObj
@@ -2575,7 +2575,7 @@ class Home:
             
             ep_obj_list.append(cur_ep_obj)
                 
-        t = PageTemplate(file="testRename.tmpl")
+        t = PageTemplate(file=u"testRename.tmpl")
         t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
         t.ep_obj_list = ep_obj_list
         t.show = showObj
@@ -2785,7 +2785,7 @@ class WebInterface:
         #epList.sort(sorts[sort])
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
-        t = PageTemplate(file="comingEpisodes.tmpl")
+        t = PageTemplate(file=u"comingEpisodes.tmpl")
         paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
         paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
         t.submenu = [
