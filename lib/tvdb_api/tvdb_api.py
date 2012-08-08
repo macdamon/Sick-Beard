@@ -63,6 +63,7 @@ from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
     tvdb_seasonnotfound, tvdb_episodenotfound, tvdb_attributenotfound)
 
 lastTimeout = None
+lastTimeout_sleep_counter = 0
 
 def log():
     return logging.getLogger("tvdb_api")
@@ -399,10 +400,17 @@ class Tvdb:
         """
         
         global lastTimeout
+        global lastTimeout_sleep_counter
         
-        # if we're given a lastTimeout that is less than 1 min just give up
+        # if we're given a lastTimeout that is less than 1 min just wait a few seconds
         if not forceConnect and lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
-            raise tvdb_error("We recently timed out, so giving up early this time")
+            if lastTimeout_sleep_counter <= 6:
+                lastTimeout_sleep_counter = lastTimeout_sleep_counter + 1
+                time.sleep(5)
+            else:
+                raise tvdb_error("We recently timed out, so giving up early this time")
+        else:
+            lastTimeout_sleep_counter = 0
         
         self.shows = ShowContainer() # Holds all Show classes
         self.corrections = {} # Holds show-name to show_id mapping
