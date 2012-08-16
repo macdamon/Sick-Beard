@@ -114,7 +114,13 @@ class WindowsUpdateManager(UpdateManager):
         self.version_url = 'https://raw.github.com/midgetspy/Sick-Beard/windows_binaries/updates.txt'
 
     def _find_installed_version(self):
-        return int(sickbeard.version.SICKBEARD_VERSION[6:])
+        try:
+            version = sickbeard.version.SICKBEARD_VERSION
+            return int(version[6:])
+        except ValueError:
+            logger.log(u"Unknown SickBeard Windows binary release: " + version, logger.ERROR)
+            return None
+
 
     def _find_newest_version(self, whole_link=False):
         """
@@ -151,8 +157,12 @@ class WindowsUpdateManager(UpdateManager):
             return True
 
     def set_newest_text(self):
-        new_str = 'There is a <a href="'+self.gc_url+'" onclick="window.open(this.href); return false;">newer version available</a> (build '+str(self._newest_version)+')'
-        new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
+        if not self._cur_version:
+            new_str = "Unknown SickBeard Windows binary version. Not updating with original version."
+        else:
+            new_str = 'There is a <a href="' + self.gc_url + '" onclick="window.open(this.href); return false;">newer version available</a> (build ' + str(self._newest_version) + ')'
+            new_str += "&mdash; <a href=\"" + self.get_update_url() + "\">Update Now</a>"
+
         sickbeard.NEWEST_VERSION_STRING = new_str
 
     def update(self):
