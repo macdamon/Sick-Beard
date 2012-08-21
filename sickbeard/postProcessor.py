@@ -758,19 +758,7 @@ class PostProcessor(object):
                 self._delete(cur_ep.location, associated_files=True)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
-        
-        # if the show directory doesn't exist then make it if allowed
-        if not ek.ek(os.path.isdir, ep_obj.show.location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
-            self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
-            try:
-                ek.ek(os.mkdir, ep_obj.show.location)
-                
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the show directory: "+ep_obj.show.location)
-        
-            # get metadata for the show (but not episode because it hasn't been fully processed)
-            ep_obj.show.writeMetadata(True)
-            
+
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
@@ -794,22 +782,22 @@ class PostProcessor(object):
                     logger.log("good results: "+repr(self.good_results), logger.DEBUG)
 
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-                
+
                 cur_ep.saveToDB()
 
         # find the destination folder
-        try:
-            proper_path = ep_obj.proper_path()
-            proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
-            
-            dest_path = ek.ek(os.path.dirname, proper_absolute_path)
-        except exceptions.ShowDirNotFoundException:
-            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
-            
-        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
+        proper_path = ep_obj.proper_path()
 
-        # create any folders we need
-        helpers.make_dirs(dest_path)
+        if not ek.ek(os.path.isdir, ep_obj.show._location):
+            self._log(u"Show folder " + ep_obj.show._location + " doesn't exist ", logger.DEBUG)
+
+        proper_absolute_path = ek.ek(os.path.join, ep_obj.show._location, proper_path)
+        dest_path = ek.ek(os.path.dirname, proper_absolute_path)
+        self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
+
+        # try creating any folders we need
+        if not helpers.make_dirs(dest_path):
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:

@@ -82,19 +82,11 @@ class TVShow(object):
         self.saveToDB()
 
     def _getLocation(self):
-        # no dir check needed if missing show dirs are created during post-processing
-        if sickbeard.CREATE_MISSING_SHOW_DIRS:
-            return self._location
-        
+
         if ek.ek(os.path.isdir, self._location):
             return self._location
         else:
             raise exceptions.ShowDirNotFoundException("Show folder doesn't exist, you shouldn't be using it")
-
-        if self._isDirGood:
-            return self._location
-        else:
-            raise exceptions.NoNFOException("Show folder doesn't exist, you shouldn't be using it")
 
     def _setLocation(self, newLocation):
         logger.log(u"Setter sets location to " + newLocation, logger.DEBUG)
@@ -741,8 +733,8 @@ class TVShow(object):
 
     def refreshDir(self):
 
-        # make sure the show dir is where we think it is unless dirs are created on the fly
-        if not ek.ek(os.path.isdir, self._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+        # make sure the show dir is where we think it is
+        if not ek.ek(os.path.isdir, self._location):
             return False
 
         # load from dir
@@ -1144,8 +1136,8 @@ class TVEpisode(object):
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
         
-        #don't update show status if show dir is missing, unless missing show dirs are created during post-processing
-        if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+        #don't update show status if show dir is missing
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
