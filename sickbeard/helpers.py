@@ -457,19 +457,23 @@ def make_dirs(path):
     
     return True
 
-def rename_ep_file(cur_path, new_path):
+def rename_ep_file(cur_path, new_path, old_path_length=0):
     """
     Creates all folders needed to move a file to its new location, renames it, then cleans up any folders
     left that are now empty.
     
     cur_path: The absolute path to the file you want to move/rename
     new_path: The absolute path to the destination for the file WITHOUT THE EXTENSION
+    old_path_length: The length of media file path (old name) WITHOUT THE EXTENSION
     """
     
-    logger.log(u"Renaming file from "+cur_path+" to "+new_path)
-    
     new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
-    cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
+    if old_path_length == 0 or old_path_length > len(cur_path):
+        # approach from the right
+        cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
+    else:
+        # approach from the left
+        cur_file_ext = cur_path[old_path_length:]
     
     # put the extension on the incoming file
     new_path += cur_file_ext
@@ -478,6 +482,7 @@ def rename_ep_file(cur_path, new_path):
     
     # move the file
     try:
+        logger.log(u"Renaming file from " + cur_path + " to " + new_path)
         ek.ek(os.rename, cur_path, new_path)
     except (OSError, IOError), e:
         logger.log(u"Failed renaming " + cur_path + " to " + new_path + ": " + ex(e), logger.ERROR)
