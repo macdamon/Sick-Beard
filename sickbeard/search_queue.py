@@ -142,10 +142,11 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 
         logger.log(u"Changing all old missing episodes to status WANTED")
 
-        curDate = datetime.date.today().toordinal()
+        cur_date = datetime.date.today().toordinal()
+        no_date = 1
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [common.UNAIRED, curDate])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate > ? AND airdate < ?", [common.UNAIRED, no_date, cur_date])
 
         for sqlEp in sqlResults:
 
