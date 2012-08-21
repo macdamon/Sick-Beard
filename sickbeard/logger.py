@@ -52,6 +52,7 @@ class SBRotatingLogHandler(object):
         self.num_bytes = num_bytes
 
         self.log_file = log_file
+        self.log_file_path = log_file
         self.cur_handler = None
 
         self.writes_since_check = 0
@@ -78,7 +79,7 @@ class SBRotatingLogHandler(object):
                 # add the handler to the root logger
                 logging.getLogger('sickbeard').addHandler(console)
 
-        self.log_file = os.path.join(sickbeard.LOG_DIR, os.path.basename(self.log_file))
+        self.log_file_path = os.path.join(sickbeard.LOG_DIR, self.log_file)
         self.cur_handler = self._config_handler()
         logging.getLogger('sickbeard').addHandler(self.cur_handler)
         logging.getLogger('sickbeard').setLevel(logging.DEBUG)
@@ -95,7 +96,7 @@ class SBRotatingLogHandler(object):
         Configure a file handler to log at file_name and return it.
         """
 
-        file_handler = logging.FileHandler(self.log_file)
+        file_handler = logging.FileHandler(self.log_file_path)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
         return file_handler
@@ -107,7 +108,7 @@ class SBRotatingLogHandler(object):
 
         i: Log number to ues
         """
-        return self.log_file + ('.' + str(i) if i else '')
+        return self.log_file_path + ('.' + str(i) if i else '')
 
     def _num_logs(self):
         """
@@ -154,7 +155,7 @@ class SBRotatingLogHandler(object):
 
             # check the size and see if we need to rotate
             if self.writes_since_check >= 10:
-                if os.path.isfile(self.log_file) and os.path.getsize(self.log_file) >= LOG_SIZE:
+                if os.path.isfile(self.log_file_path) and os.path.getsize(self.log_file_path) >= LOG_SIZE:
                     self._rotate_logs()
                 self.writes_since_check = 0
             else:
