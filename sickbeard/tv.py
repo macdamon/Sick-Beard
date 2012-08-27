@@ -265,9 +265,13 @@ class TVShow(object):
         if self.lang:
             ltvdb_api_parms['language'] = self.lang
 
-        t = tvdb_api.Tvdb(**ltvdb_api_parms)
+        try:
+            t = tvdb_api.Tvdb(**ltvdb_api_parms)
+            cachedShow = t[self.tvdbid]
+        except tvdb_exceptions.tvdb_error:
+            logger.log(u"TVDB timed out, unable to update episodes from TVDB", logger.ERROR)
+            return None
 
-        cachedShow = t[self.tvdbid]
         cachedSeasons = {}
 
         for curResult in sqlResults:

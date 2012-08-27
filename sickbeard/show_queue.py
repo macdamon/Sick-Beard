@@ -372,7 +372,11 @@ class QueueItemUpdate(ShowQueueItem):
 
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)
-        DBEpList = self.show.loadEpisodesFromDB()
+        try:
+            DBEpList = self.show.loadEpisodesFromDB()
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log(u"Unable to contact TVDB, aborting: "+ex(e), logger.WARNING)
+            return
 
         # get episode list from TVDB
         logger.log(u"Loading all episodes from theTVDB", logger.DEBUG)
