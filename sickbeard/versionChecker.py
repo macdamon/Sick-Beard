@@ -72,7 +72,7 @@ class CheckVersion():
         """
 
         # check if we're a windows build
-        if version.SICKBEARD_VERSION.startswith('build '):
+        if sickbeard.version.SICKBEARD_VERSION.startswith('build '):
             install_type = 'win'
         elif os.path.isdir(ek.ek(os.path.join, sickbeard.PROG_DIR, u'.git')):
             install_type = 'git'
@@ -246,7 +246,11 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
-        self.branch = self._find_git_branch()
+        try:
+            # using SourceUpdateManager()
+            self.branch
+        except:
+            self.branch = self._find_git_branch()
 
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
@@ -319,13 +323,12 @@ class GitUpdateManager(UpdateManager):
     def _find_git_branch(self):
 
         branch_info = self._run_git('symbolic-ref -q HEAD')
+        if branch_info or branch_info[0]:
+            branch = branch_info[0].strip().replace('refs/heads/', '', 1)
+            if branch:
+                sickbeard.version.SICKBEARD_VERSION = branch
 
-        if not branch_info or not branch_info[0]:
-            return 'master'
-
-        branch = branch_info[0].strip().replace('refs/heads/', '', 1)
-
-        return branch or 'master'
+        return sickbeard.version.SICKBEARD_VERSION
 
     def _check_github_for_update(self):
         """
@@ -434,6 +437,10 @@ class GitUpdateManager(UpdateManager):
 
 
 class SourceUpdateManager(GitUpdateManager):
+
+    def __init__(self):
+
+        self.branch = sickbeard.version.SICKBEARD_VERSION
 
     def _find_installed_version(self):
 
