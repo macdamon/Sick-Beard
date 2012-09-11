@@ -663,11 +663,12 @@ def get_xml_text(node):
             text += child_node.data
     return text.strip()
 
+
 def backupVersionedFile(old_file, version):
     numTries = 0
-    
+
     new_file = old_file + '.' + 'v' + str(version)
-    
+
     while not ek.ek(os.path.isfile, new_file):
         if not ek.ek(os.path.isfile, old_file):
             return False
@@ -678,7 +679,7 @@ def backupVersionedFile(old_file, version):
             logger.log(u"Done backup, proceeding with migration.")
             break
         except Exception, e:
-            logger.log(u"Error while trying to back up " + old_file + " to " + new_file +" : " + ex(e))
+            logger.log(u"Error while trying to back up " + old_file + " to " + new_file + " : " + ex(e))
             numTries += 1
             time.sleep(1)
             logger.log(u"Trying again.")
@@ -686,3 +687,5 @@ def backupVersionedFile(old_file, version):
         if numTries >= 10:
             logger.log(u"Unable to back up " + old_file + " to " + new_file + " please do it manually.")
             return False
+
+    return True

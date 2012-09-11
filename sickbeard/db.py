@@ -189,7 +189,10 @@ class SchemaUpgrade (object):
         else:
             return 0
 
-    def incDBVersion(self):
-        curVersion = self.checkDBVersion()
-        self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
-        return curVersion+1
+    def incDBVersion(self, set_version=None):
+        if set_version:
+            cur_version = set_version
+        else:
+            cur_version = self.checkDBVersion() + 1
+        self.connection.action("UPDATE db_version SET db_version = ?", [cur_version])
+        return cur_version
