@@ -87,7 +87,7 @@ class MainSanityCheck(db.DBSanityCheck):
 
 def backupDatabase(version):
     if not helpers.backupVersionedFile(db.dbFilename(), version):
-        logger.log(u"Abort upgrading database")
+        logger.log(u"Database backup failed, abort upgrading database")
         sys.exit(1)
 
 # ======================
@@ -297,14 +297,13 @@ class NewQualitySettings (NumericProviders):
 
 class DropOldHistoryTable(NewQualitySettings):
     def test(self):
-        return self.checkDBVersion() >= 2
+        return self.checkDBVersion() >= 2 and not self.hasTable("history_old")
 
     def execute(self):
-        backupDatabase(self.checkDBVersion())
 
         if self.hasTable("history_old"):
             self.connection.action("DROP TABLE history_old")
-        self.incDBVersion()
+        self.incDBVersion(set_version=2)
 
 
 class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
@@ -326,11 +325,12 @@ class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
 
 class AddAirByDateOption(UpgradeHistoryForGenericProviders):
     def test(self):
-        return self.checkDBVersion() >= 4
+        return self.checkDBVersion() >= 4 and self.hasColumn("tv_shows", "air_by_date")
 
     def execute(self):
-        self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
-        self.incDBVersion()
+        if not self.hasColumn("tv_shows", "air_by_date"):
+            self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
+        self.incDBVersion(set_version=4)
 
 
 class ChangeSabConfigFromIpToHost(AddAirByDateOption):
@@ -448,7 +448,7 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
 class AddSizeAndSceneNameFields(FixAirByDateSetting):
 
     def test(self):
-        return self.hasColumn("tv_episodes", "file_size") and self.hasColumn("tv_episodes", "release_name")
+        return self.checkDBVersion() >= 10 and self.hasColumn("tv_episodes", "file_size") and self.hasColumn("tv_episodes", "release_name")
 
     def execute(self):
 
@@ -545,13 +545,13 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
             logger.log(u"Name " + ep_file_name + " gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
             self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [ep_file_name, cur_result["episode_id"]])
 
-        self.incDBVersion()
+        self.incDBVersion(set_version=10)
 
 
 class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
     def test(self):
-        return self.hasColumn("tv_shows", "flatten_folders")
+        return self.checkDBVersion() >= 11 and self.hasColumn("tv_shows", "flatten_folders")
 
     def execute(self):
 
@@ -569,4 +569,4 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
             self.connection.action("UPDATE tv_shows SET flatten_folders = 0 WHERE flatten_folders = 2")
             self.connection.action("DROP TABLE tmp_tv_shows")
 
-        self.incDBVersion()
+        self.incDBVersion(set_version=11)
