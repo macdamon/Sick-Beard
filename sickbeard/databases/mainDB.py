@@ -557,16 +557,47 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         if not self.hasColumn("tv_shows", "flatten_folders"):
             backupDatabase(self.checkDBVersion())
-            # rename the column
-            self.connection.action("ALTER TABLE tv_shows RENAME TO tmp_tv_shows")
-            self.connection.action("CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT)")
-            sql = "INSERT INTO tv_shows(show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, flatten_folders, paused, startyear, tvr_id, tvr_name, air_by_date, lang) SELECT show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, seasonfolders, paused, startyear, tvr_id, tvr_name, air_by_date, lang FROM tmp_tv_shows"
-            self.connection.action(sql)
 
+            # get information on current table
+            columns = self.connection.action("PRAGMA table_info(tv_shows)")
+            # rename table
+            self.connection.action("ALTER TABLE tv_shows RENAME TO tmp_tv_shows")
+
+            #create new table tv_shows but name column differently
+            sql_statement = "CREATE TABLE tv_shows ("
+
+            make_columns = ""
+            column_list = []
+
+            for column in columns:
+                # rename column
+                if column['name'] == 'seasonfolders':
+                        column_name = 'flatten_folders'
+                else:
+                    column_name = column['name']
+
+                column_type = column['type']
+
+                if column['pk'] == 1:
+                        column_type += ' PRIMARY KEY'
+
+                column_list += [column_name + " " + column_type]
+
+            make_columns += ", ".join(column_list)
+
+            sql_statement += make_columns
+
+            sql_statement += ")"
+
+            self.connection.action(sql_statement)
+
+            # fill the new table with old values
+            self.connection.action("INSERT INTO tv_shows SELECT * FROM tmp_tv_shows")
+            self.connection.action("DROP TABLE tmp_tv_shows")
             # flip the values to be opposite of what they were before
             self.connection.action("UPDATE tv_shows SET flatten_folders = 2 WHERE flatten_folders = 1")
             self.connection.action("UPDATE tv_shows SET flatten_folders = 1 WHERE flatten_folders = 0")
             self.connection.action("UPDATE tv_shows SET flatten_folders = 0 WHERE flatten_folders = 2")
-            self.connection.action("DROP TABLE tmp_tv_shows")
+
 
         self.incDBVersion(set_version=11)
