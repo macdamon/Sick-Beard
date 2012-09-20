@@ -1684,17 +1684,18 @@ class TVEpisode(object):
         Renames an episode file and all related files to the location and filename as specified
         in the naming settings.
         """
-        
+
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
         absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
+        absolute_current_path_no_ext_length = len(absolute_current_path_no_ext)
 
         current_path = absolute_current_path_no_ext
 
         if absolute_current_path_no_ext.startswith(self.show.location):
             current_path = absolute_current_path_no_ext[len(self.show.location):]
 
-        logger.log(u"Renaming/moving episode from the base path "+self.location+" to "+absolute_proper_path, logger.DEBUG)
+        logger.log(u"Renaming/moving episode from the base path " + self.location + " to " + absolute_proper_path, logger.DEBUG)
 
         # if it's already named correctly then don't do anything
         if proper_path == current_path:
@@ -1702,14 +1703,14 @@ class TVEpisode(object):
             return
 
         related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
-        logger.log(u"Files associated to "+self.location+": "+str(related_files), logger.DEBUG)
+        logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file
-        result = helpers.rename_ep_file(self.location, absolute_proper_path)
+        result = helpers.rename_ep_file(self.location, absolute_proper_path, absolute_current_path_no_ext_length)
         
         # move related files
         for cur_related_file in related_files:
-            cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path)
+            cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path, absolute_current_path_no_ext_length)
             if cur_result == False:
                 logger.log(str(self.tvdbid) + ": Unable to rename file "+cur_related_file, logger.ERROR)
 
