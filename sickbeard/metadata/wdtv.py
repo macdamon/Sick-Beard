@@ -184,6 +184,10 @@ class WDTVMetadata(generic.GenericMetadata):
             title = etree.SubElement(episode, "title")
             title.text = ep_obj.prettyName()
 
+            runtime = etree.SubElement(episode, "runtime")
+            if myShow["runtime"] != None:
+                runtime.text = myShow["runtime"]
+
             seriesName = etree.SubElement(episode, "series_name")
             if myShow["seriesname"] != None:
                 seriesName.text = myShow["seriesname"]
@@ -198,7 +202,7 @@ class WDTVMetadata(generic.GenericMetadata):
             episodeNum = etree.SubElement(episode, "episode_number")
             episodeNum.text = str(curEpToWrite.episode)
             
-            firstAired = etree.SubElement(episode, "firstaired")
+            firstAired = etree.SubElement(episode, "year")
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
                 firstAired.text = str(curEpToWrite.airdate)
 
@@ -211,9 +215,13 @@ class WDTVMetadata(generic.GenericMetadata):
             if director_text != None:
                 director.text = director_text
 
-            actor = etree.SubElement(episode, "actor")
             if myShow["actors"] != None:
-                actor.text = " / ".join([x for x in myShow["actors"].split('|') if x])
+                for actor_name in myShow["actors"].split('|'):
+                    actor = etree.SubElement(episode, "actor")
+                    actor_name_node = etree.SubElement(actor, "name")
+                    actor_name_node.text = actor_name
+                    actor_role_node = etree.SubElement(actor, "role")
+                    actor_role_node.text = ""
 
             overview = etree.SubElement(episode, "overview")
             if curEpToWrite.description != None:
